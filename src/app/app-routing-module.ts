@@ -1,10 +1,41 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { Roles } from './constants/Roles';
+import { AuthGuard } from './guards/auth.guard';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { LoginComponent } from './components/login/login.component';
+import { UsuariosComponent } from './components/usuarios/usuarios.component';
 
-const routes: Routes = [];
+const routes: Routes = [
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full',
+  },
+  {
+    path: 'login',
+    component: LoginComponent,
+  },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    children: [
+      {
+        path: 'usuarios',
+        component: UsuariosComponent,
+        canActivate: [AuthGuard],
+        data: {
+          roles: [Roles.ADMIN],
+        },
+      },
+    ],
+    canActivate: [AuthGuard],
+  },
+  { path: '**', redirectTo: 'dashboard' },
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

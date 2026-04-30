@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-reservaciones',
   standalone: false,
-  templateUrl: './reservaciones.html',
-  styleUrl: './reservaciones.css',
+  templateUrl: './reservaciones.component.html',
+  styleUrl: './reservaciones.component.css',
 })
 export class ReservacionesComponent {}

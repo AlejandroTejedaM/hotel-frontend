@@ -12,6 +12,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './shared/auth.interceptor';
 import { ErrorInterceptor } from './shared/error.interceptor';
+import { HabitacionesComponent } from './components/habitaciones/habitaciones.component';
+import { ReservacionesComponent } from './components/reservaciones/reservaciones.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +23,8 @@ import { ErrorInterceptor } from './shared/error.interceptor';
     UsuariosComponent,
     DashboardComponent,
     LoginComponent,
+    HabitacionesComponent,
+    ReservacionesComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [

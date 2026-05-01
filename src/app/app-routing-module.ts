@@ -6,6 +6,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { LoginComponent } from './components/login/login.component';
 import { UsuariosComponent } from './components/usuarios/usuarios.component';
 import { HabitacionesComponent } from './components/habitaciones/habitaciones.component';
+import { HuespedesComponent } from './components/huespedes/huespedes.component';
 
 const routes: Routes = [
   {
@@ -13,6 +14,7 @@ const routes: Routes = [
     redirectTo: 'login',
     pathMatch: 'full',
   },
+  
   {
     path: 'login',
     component: LoginComponent,
@@ -37,6 +39,14 @@ const routes: Routes = [
           roles: [Roles.ADMIN, Roles.USER],
         },
       },
+      {
+        path: 'huespedes',
+        component:HuespedesComponent,
+        canActivate:[AuthGuard],
+        data: {
+          roles: [Roles.ADMIN, Roles.USER],
+        }
+      }
     ],
     canActivate: [AuthGuard],
   },

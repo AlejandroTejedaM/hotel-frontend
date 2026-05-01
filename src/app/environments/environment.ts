@@ -5,4 +5,5 @@ export const environment = {
   authUrl: defaultUrl.concat(':9000/api/login'),
   apiUsuarios: defaultUrl.concat(':9000/admin/usuarios'),
   apiHabitaciones: defaultUrl.concat(':8090/api/habitaciones'),
+  apiHuespedes: defaultUrl.concat(':8090/api/huespedes'),
 };

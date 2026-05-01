@@ -138,7 +138,7 @@ export class HabitacionesComponent implements OnInit, AfterViewInit {
 
     this.habitacionForm.patchValue({ ...habitacion });
 
-    if (this.authService.hasRole(Roles.USER)) {
+    if (!this.authService.hasRole(Roles.ADMIN)) {
       this.habitacionForm.get('precio')?.disable();
     }
 

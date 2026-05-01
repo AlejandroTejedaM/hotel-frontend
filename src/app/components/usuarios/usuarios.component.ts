@@ -104,8 +104,7 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
         next: (newUser) => {
           this.listarUsuarios();
           this.modalInstance.hide();
-          Swal.fire('Registrado', 'Usuario registrado correctamente', 'success');
-          this.modalInstance.hide();
+          Swal.fire('Actualizado', 'Usuario actualizado correctamente', 'success');
         },
         error: (err) => {
           console.log('Error al registrar usuario: ', err);
@@ -173,7 +172,11 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
       roles: rolesSeleccionados
     });
 
-    this.usuarioForm.get('password')?.clearValidators();
+    this.usuarioForm.get('password')?.setValidators([
+      Validators.minLength(8),
+      Validators.maxLength(20),
+      Validators.pattern('^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$')
+    ]);
     this.usuarioForm.get('password')?.updateValueAndValidity();
     this.modalInstance.show();
     }

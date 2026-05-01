@@ -56,14 +56,11 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
   protected listarUsuarios(): void {
     this.userService.getUsuarios().subscribe({
       next: (value) => {
-        console.log('Usuarios obtenidos:', value);
         this.usuarios = value;
       },
       error: (err) => {
-        console.error('Error al listar usuarios: ', err);
         Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error');
       },
-      complete: () => console.log('Usuarios listados correctamente'),
     });
   }
 
@@ -98,7 +95,6 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
       return;
     }
     const usuarioData: UsuarioRequest = this.usuarioForm.value;
-
     if (this.esEditMode && this.selectedUsuario) {
       this.userService.putUsuario(usuarioData, usuarioData.username).subscribe({
         next: (newUser) => {
@@ -110,7 +106,6 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
           this.modalInstance.hide();
         },
         error: (err) => {
-          console.log('Error al registrar usuario: ', err);
           Swal.fire(
             'Error',
             `<div> No se pudo registrar el usuario <ol>${err.error?.mensaje}</ol> </div>`,
@@ -128,7 +123,6 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
         this.modalInstance.hide();
       },
       error: (err) => {
-        console.log('Error al registrar usuario: ', err);
         Swal.fire(
           'Error',
           `<div> No se pudo registrar el usuario <ol>${err.error?.mensaje}</ol> </div>`,

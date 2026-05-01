@@ -13,3 +13,11 @@ export interface HabitacionRequest {
   precio: number;
   capacidad: number;
 }
+
+export interface DatosHabitacion {
+  id: number;
+  numero: number;
+  tipo: string;
+  precio: number;
+  capacidad: number;
+}

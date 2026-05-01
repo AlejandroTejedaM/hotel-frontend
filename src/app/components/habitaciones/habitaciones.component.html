@@ -1,7 +1,7 @@
 <div class="container-fluid mt-4">
   <h2>Habitaciones</h2>
   <div class="d-flex justify-content-between mb-3">
-    <button (click)="toggleForm()" class="btn btn-success">
+    <button *ngIf="isAdmin()" (click)="toggleForm()" class="btn btn-success">
       <i class="fa-solid fa-plus"></i>
       Registrar habitación
     </button>

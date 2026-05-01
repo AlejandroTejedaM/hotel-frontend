@@ -84,7 +84,6 @@ export class HuespedesComponent implements OnInit, AfterViewInit {
           this.modalInstance.hide();
         },
         error: (err) => {
-          console.log('Error al actualizar huésped: ', err);
           Swal.fire(
             'Error',
             `<div>No se pudo actualizar el huésped<br><small>${err.error?.message ?? ''}</small></div>`,
@@ -102,7 +101,6 @@ export class HuespedesComponent implements OnInit, AfterViewInit {
         this.modalInstance.hide();
       },
       error: (err) => {
-        console.log('Error al registrar huésped: ', err);
         Swal.fire(
           'Error',
           `<div>No se pudo registrar el huésped<br><small>${err.error?.message ?? ''}</small></div>`,
@@ -115,7 +113,7 @@ export class HuespedesComponent implements OnInit, AfterViewInit {
   protected editarHuesped(huesped: HuespedResponse): void {
     this.esEditMode = true;
     this.selectedHuesped = huesped;
-    this.selectedHuespedId = huesped.idHuesped;
+    this.selectedHuespedId = huesped.id;
     this.textoModal = 'Editando Huésped: ' + huesped.nombre + ' ' + huesped.apellidoPaterno;
     this.huespedForm.patchValue({ ...huesped });
     this.modalInstance.show();
@@ -135,7 +133,7 @@ export class HuespedesComponent implements OnInit, AfterViewInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.huespedService.deleteHuesped(huesped.idHuesped).subscribe({
+        this.huespedService.deleteHuesped(huesped.id).subscribe({
           next: () => {
             this.refrescarHuespedes();
             Swal.fire('Eliminado', 'Huésped eliminado correctamente', 'success');

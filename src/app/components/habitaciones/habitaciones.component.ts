@@ -59,6 +59,7 @@ export class HabitacionesComponent implements OnInit, AfterViewInit {
 
   toggleForm(): void {
     this.textoModal = 'Registrar habitación';
+    this.esEditMode = false;
     this.modalInstance.show();
   }
 
@@ -68,7 +69,7 @@ export class HabitacionesComponent implements OnInit, AfterViewInit {
     );
   }
 
-  protected onSubmit() {
+  protected onSubmit(): void {
     if (this.habitacionForm.invalid) {
       return;
     }
@@ -82,7 +83,6 @@ export class HabitacionesComponent implements OnInit, AfterViewInit {
           this.modalInstance.hide();
         },
         error: (err) => {
-          console.log('Error al actualizar habitación: ', err);
           Swal.fire(
             'Error',
             `<div>No se pudo actualizar la habitación<br><small>${err.error?.message ?? ''}</small></div>`,
@@ -100,7 +100,6 @@ export class HabitacionesComponent implements OnInit, AfterViewInit {
         this.modalInstance.hide();
       },
       error: (err) => {
-        console.log('Error al registrar habitación: ', err);
         Swal.fire(
           'Error',
           `<div>No se pudo registrar la habitación<br><small>${err.error?.message ?? ''}</small></div>`,

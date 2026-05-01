@@ -19,7 +19,6 @@ export class AuthGuard implements CanActivate {
       return false;
     }
     const expectRoles: Roles[] = route.data['roles'];
-    console.log('Roles esperados: ', expectRoles);
     if (expectRoles && !this.authService.hasAnyRole(expectRoles)) {
       Swal.fire(
         'Acceso denegado',

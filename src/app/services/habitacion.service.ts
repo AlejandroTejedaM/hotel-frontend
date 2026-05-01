@@ -31,7 +31,10 @@ export class HabitacionService {
     );
   }
 
-  putHabitacion(habitacion: HabitacionRequest, habitacionId: number): Observable<HabitacionResponse> {
+  putHabitacion(
+    habitacion: HabitacionRequest,
+    habitacionId: number,
+  ): Observable<HabitacionResponse> {
     return this.http.put<HabitacionResponse>(`${this.apiUrl}/${habitacionId}`, habitacion).pipe(
       catchError((error) => {
         console.error('Error al actualizar la habitación', error);

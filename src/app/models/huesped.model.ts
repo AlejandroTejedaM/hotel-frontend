@@ -1,5 +1,14 @@
+export interface DatosHuesped {
+  id: number;
+  nombre: string;
+  email: string;
+  telefono: string;
+  documento: string;
+  nacionalidad: string;
+}
+
 export interface HuespedResponse {
-  idHuesped: number;
+  id: number;
   nombre: string;
   apellidoPaterno: string;
   apellidoMaterno: string;

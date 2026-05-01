@@ -48,10 +48,13 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
     this.modalInstance = new bootstrap.Modal(this.usuarioModalEl.nativeElement, {
       keyboard: false,
     });
-    this.usuarioModalEl.nativeElement.addEventListener('hidden.bs.modal', () => {});
+    this.usuarioModalEl.nativeElement.addEventListener('hidden.bs.modal', () => {
+      this.resetForm();
+    });
   }
 
   toggleForm(): void {
+    this.resetForm();
     this.textoModal = 'Registrar Usuario';
     this.modalInstance.show();
   }
@@ -100,6 +103,7 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
       this.userService.putUsuario(usuarioData, usuarioData.username).subscribe({
         next: (newUser) => {
           this.listarUsuarios();
+          this.modalInstance.hide();
           Swal.fire('Registrado', 'Usuario registrado correctamente', 'success');
           this.modalInstance.hide();
         },
@@ -138,15 +142,45 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
 
   resetForm(): void {
     this.esEditMode = false;
-    this.usuarioForm.reset();
+    this.selectedUsuario = null;
+    this.textoModal = 'Registrar Usuario';
+    this.usuarioForm.get('password')?.setValidators([
+      // ← NUEVO
+      Validators.required,
+      Validators.minLength(8),
+      Validators.maxLength(20),
+      Validators.pattern('^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$'),
+    ]);
+    this.usuarioForm.get('password')?.updateValueAndValidity();
+    this.usuarioForm.reset({
+      username: '',
+      password: '',
+      roles: [],
+    });
+    this.usuarioForm.markAsPristine();
+    this.usuarioForm.markAsUntouched();
   }
 
   protected editarUsuario(usuario: UsuarioResponse): void {
     this.esEditMode = true;
-    this.selectedUsuario = usuario;
+    this.selectedUsuario = { ...usuario };
     this.textoModal = 'Editando Usuario: ' + usuario.username;
+    this.usuarioForm.reset({ username: '', password: '', roles: [] }); // ← NUEVO
+    const rolesSeleccionados = usuario.roles.map((rol) => rol as string);
+    this.usuarioForm.patchValue({
+      username: usuario.username,
+      password: '',
+      roles: rolesSeleccionados
+    });
 
-    this.usuarioForm.patchValue({ ...usuario });
+    this.usuarioForm.get('password')?.clearValidators();
+    this.usuarioForm.get('password')?.updateValueAndValidity();
     this.modalInstance.show();
-  }
+    }
+
+
+
+   // this.usuarioForm.patchValue({ ...usuario });
+    //this.modalInstance.show();
+
 }

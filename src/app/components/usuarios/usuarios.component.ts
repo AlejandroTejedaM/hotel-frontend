@@ -30,16 +30,19 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
 
   constructor(
     private fb: FormBuilder,
-    private userService: UsuariosService
+    private userService: UsuariosService,
   ) {
     this.usuarioForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(20)]],
-      password: ['', [
-      Validators.required,
-      Validators.minLength(8),
-      Validators.maxLength(20),
-      Validators.pattern('^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$')
-    ]],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(20),
+          Validators.pattern('^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$'),
+        ],
+      ],
       roles: [[], [Validators.required]],
     });
   }
@@ -60,9 +63,7 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
   }
 
   public ngOnInit(): void {
-    this.usuarios$ = this.refresh$.pipe(
-      switchMap(() => this.userService.getUsuarios())
-    );
+    this.usuarios$ = this.refresh$.pipe(switchMap(() => this.userService.getUsuarios()));
   }
 
   protected listarUsuarios(): void {
@@ -143,14 +144,6 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
     this.esEditMode = false;
     this.selectedUsuario = null;
     this.textoModal = 'Registrar Usuario';
-    this.usuarioForm.get('password')?.setValidators([
-      // ← NUEVO
-      Validators.required,
-      Validators.minLength(8),
-      Validators.maxLength(20),
-      Validators.pattern('^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$'),
-    ]);
-    this.usuarioForm.get('password')?.updateValueAndValidity();
     this.usuarioForm.reset({
       username: '',
       password: '',
@@ -164,26 +157,13 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
     this.esEditMode = true;
     this.selectedUsuario = { ...usuario };
     this.textoModal = 'Editando Usuario: ' + usuario.username;
-    this.usuarioForm.reset({ username: '', password: '', roles: [] }); // ← NUEVO
     const rolesSeleccionados = usuario.roles.map((rol) => rol as string);
     this.usuarioForm.patchValue({
       username: usuario.username,
       password: '',
-      roles: rolesSeleccionados
+      roles: rolesSeleccionados,
     });
 
-    this.usuarioForm.get('password')?.setValidators([
-      Validators.minLength(8),
-      Validators.maxLength(20),
-      Validators.pattern('^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$')
-    ]);
-    this.usuarioForm.get('password')?.updateValueAndValidity();
     this.modalInstance.show();
-    }
-
-
-
-   // this.usuarioForm.patchValue({ ...usuario });
-    //this.modalInstance.show();
-
+  }
 }

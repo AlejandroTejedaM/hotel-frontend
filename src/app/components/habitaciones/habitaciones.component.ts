@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { Roles } from '../../constants/Roles';
+import { DescripcionEstadoHabitacion, EstadoHabitacion } from '../../constants/EstadoHabitacion';
 
 declare var bootstrap: any;
 
@@ -18,15 +19,20 @@ declare var bootstrap: any;
 export class HabitacionesComponent implements OnInit, AfterViewInit {
   protected habitaciones$!: Observable<HabitacionResponse[]>;
   protected textoModal: string = 'Registrar Habitación';
+  @ViewChild('habitacionModalRef')
+  habitacionModalEl!: ElementRef;
+  private modalInstance!: any;
   protected habitacionForm: FormGroup;
+
+  @ViewChild('habitacionChangeStatusModalRef')
+  habitacionChaneStatusModalEl!: ElementRef;
+  protected habitacionChangeStatusForm!: FormGroup;
+  private modalChangeStatusInstance!: any;
   protected esEditMode: boolean = false;
   private selectedHabitacion: HabitacionResponse | null = null;
   private selectedHabitacionId: number | null = null;
   private refresh$ = new BehaviorSubject<void>(undefined);
-
-  @ViewChild('habitacionModalRef')
-  habitacionModalEl!: ElementRef;
-  private modalInstance!: any;
+  protected estadosHabitacion: EstadoHabitacion[] = Object.values(EstadoHabitacion);
 
   constructor(
     private fb: FormBuilder,
@@ -39,6 +45,10 @@ export class HabitacionesComponent implements OnInit, AfterViewInit {
       precio: [null, [Validators.required, Validators.min(0.01)]],
       capacidad: [null, [Validators.required, Validators.min(1)]],
     });
+
+    this.habitacionChangeStatusForm = this.fb.group({
+      estado: [null, [Validators.required]]
+    });
   }
 
   private refrescarHabitaciones(): void {
@@ -49,10 +59,21 @@ export class HabitacionesComponent implements OnInit, AfterViewInit {
     this.modalInstance = new bootstrap.Modal(this.habitacionModalEl.nativeElement, {
       keyboard: false,
     });
+
+    this.modalChangeStatusInstance = new bootstrap.Modal(this.habitacionChaneStatusModalEl.nativeElement, {
+      keyboard: false,
+    });
+
     this.habitacionModalEl.nativeElement.addEventListener('hidden.bs.modal', () => {
       this.habitacionForm.reset();
       this.esEditMode = false;
       this.selectedHabitacion = null;
+      this.selectedHabitacionId = null;
+    });
+
+
+    this.habitacionChaneStatusModalEl.nativeElement.addEventListener('hidden.bs.modal', () => {
+      this.habitacionChangeStatusForm.reset();
       this.selectedHabitacionId = null;
     });
   }
@@ -124,6 +145,16 @@ export class HabitacionesComponent implements OnInit, AfterViewInit {
     this.modalInstance.show();
   }
 
+  protected changeEstadoHabitacion(habitacion: HabitacionResponse): void {
+    this.habitacionChangeStatusForm.patchValue({
+      estado: habitacion.estado,
+    });
+
+    this.selectedHabitacionId = habitacion.id;
+
+    this.modalChangeStatusInstance.show();
+  }
+
   protected isAdmin(): boolean {
     return this.authService.hasRole(Roles.ADMIN);
   }
@@ -154,5 +185,35 @@ export class HabitacionesComponent implements OnInit, AfterViewInit {
         });
       }
     });
+  }
+
+  protected formatEstadoHabitacion(estado: EstadoHabitacion): string {
+    return DescripcionEstadoHabitacion[estado] || 'Desconocido';
+  }
+
+  protected onSubmitChangeStatus() {
+    if (this.habitacionChangeStatusForm.invalid) {
+      return;
+    }
+
+    const raw = this.habitacionChangeStatusForm.getRawValue();
+
+    if (raw.estado && this.selectedHabitacionId) {
+      this.habitacionService.changeStatus(this.selectedHabitacionId, raw.estado).subscribe({
+        next: (): void => {
+          this.refrescarHabitaciones();
+          Swal.fire('Actualizado', 'Estado actualizado correctamente', 'success');
+          this.modalChangeStatusInstance.hide();
+        },
+        error: (err) => {
+          Swal.fire(
+            'Error',
+            `<div>${err.error?.message ?? 'Error al realizar la operación por favor contacte al Equipo de TI'}</div>`,
+            'error',
+          );
+        },
+      });
+      return;
+    }
   }
 }

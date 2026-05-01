@@ -176,11 +176,10 @@ export class ReservacionesComponent implements OnInit, AfterViewInit {
   }
 
   protected changeEstado(reservacion: ReservacionResponse): void {
+    this.selectedReservacionId = reservacion.id;
     this.reservacionChangeStatusForm.patchValue({
       estado: reservacion.estado,
     });
-
-    this.selectedReservacionId = reservacion.id;
 
     this.modalChangeStatusInstance.show();
   }
@@ -190,7 +189,7 @@ export class ReservacionesComponent implements OnInit, AfterViewInit {
     this.selectedReservacion = reservacion;
     this.selectedReservacionId = reservacion.id;
     this.textoModal = 'Editando reservación: ' + reservacion.id;
-    console.log(reservacion);
+
     this.reservacionForm.patchValue({
       habitacion: reservacion.habitacion,
       huesped: reservacion.huesped,

@@ -3,6 +3,9 @@ import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { HabitacionRequest, HabitacionResponse } from '../models/habitacion.model';
+import { EstadoReserva, IdEstadoReserva } from '../constants/EstadoReserva';
+import { ReservacionResponse } from '../models/reservacion.model';
+import { EstadoHabitacion, IdEstadoHabitacion } from '../constants/EstadoHabitacion';
 
 @Injectable({
   providedIn: 'root',
@@ -50,5 +53,15 @@ export class HabitacionService {
         return throwError(() => error);
       }),
     );
+  }
+
+  changeStatus(habitacionId: number, estadoHabitacion: EstadoHabitacion): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${habitacionId}/estado/${IdEstadoHabitacion[estadoHabitacion]}`, null)
+      .pipe(
+        catchError((error) => {
+          console.error('Error al actualizar la habitación', error);
+          return throwError(() => error);
+        }),
+      );
   }
 }

@@ -5,6 +5,9 @@ import { AuthGuard } from './guards/auth.guard';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { LoginComponent } from './components/login/login.component';
 import { UsuariosComponent } from './components/usuarios/usuarios.component';
+import { HabitacionesComponent } from './components/habitaciones/habitaciones.component';
+import { HuespedesComponent } from './components/huespedes/huespedes.component';
+import { ReservacionesComponent } from './components/reservaciones/reservaciones.component';
 
 const routes: Routes = [
   {
@@ -21,6 +24,11 @@ const routes: Routes = [
     component: DashboardComponent,
     children: [
       {
+        path: '',
+        redirectTo: 'reservaciones',
+        pathMatch: 'full',
+      },
+      {
         path: 'usuarios',
         component: UsuariosComponent,
         canActivate: [AuthGuard],
@@ -28,6 +36,30 @@ const routes: Routes = [
           roles: [Roles.ADMIN],
         },
       },
+      {
+        path: 'habitaciones',
+        component: HabitacionesComponent,
+        canActivate: [AuthGuard],
+        data: {
+          roles: [Roles.ADMIN, Roles.USER],
+        },
+      },
+      {
+        path: 'reservaciones',
+        component: ReservacionesComponent,
+        canActivate: [AuthGuard],
+        data: {
+          roles: [Roles.ADMIN, Roles.USER],
+        },
+      },
+      {
+        path: 'huespedes',
+        component:HuespedesComponent,
+        canActivate:[AuthGuard],
+        data: {
+          roles: [Roles.ADMIN, Roles.USER],
+        }
+      }
     ],
     canActivate: [AuthGuard],
   },

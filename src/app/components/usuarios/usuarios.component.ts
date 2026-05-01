@@ -5,6 +5,7 @@ import { UsuariosService } from '../../services/usuarios.service';
 import { AuthService } from '../../services/auth.service';
 import { UsuarioRequest, UsuarioResponse } from '../../models/usuario.model';
 import { DescripcionRoles, Roles } from '../../constants/Roles';
+import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 
 declare var bootstrap: any;
 
@@ -15,12 +16,13 @@ declare var bootstrap: any;
   styleUrl: './usuarios.component.css',
 })
 export class UsuariosComponent implements OnInit, AfterViewInit {
-  protected usuarios: UsuarioResponse[] = [];
+  protected usuarios$!: Observable<UsuarioResponse[]>;
   protected usuarioForm: FormGroup;
   protected textoModal: string = 'Registrar';
   protected roles: Roles[] = Object.values(Roles);
   protected esEditMode: boolean = false;
   protected selectedUsuario: UsuarioResponse | null = null;
+  private refresh$ = new BehaviorSubject<void>(undefined);
 
   @ViewChild('usuarioModalRef')
   usuarioModalEl!: ElementRef;
@@ -28,11 +30,19 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
 
   constructor(
     private fb: FormBuilder,
-    private userService: UsuariosService
+    private userService: UsuariosService,
   ) {
     this.usuarioForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(20)]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(20),
+          Validators.pattern('^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$'),
+        ],
+      ],
       roles: [[], [Validators.required]],
     });
   }
@@ -41,30 +51,23 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
     this.modalInstance = new bootstrap.Modal(this.usuarioModalEl.nativeElement, {
       keyboard: false,
     });
-    this.usuarioModalEl.nativeElement.addEventListener('hidden.bs.modal', () => {});
+    this.usuarioModalEl.nativeElement.addEventListener('hidden.bs.modal', () => {
+      this.resetForm();
+    });
   }
 
   toggleForm(): void {
+    this.resetForm();
     this.textoModal = 'Registrar Usuario';
     this.modalInstance.show();
   }
 
   public ngOnInit(): void {
-    this.listarUsuarios();
+    this.usuarios$ = this.refresh$.pipe(switchMap(() => this.userService.getUsuarios()));
   }
 
   protected listarUsuarios(): void {
-    this.userService.getUsuarios().subscribe({
-      next: (value) => {
-        console.log('Usuarios obtenidos:', value);
-        this.usuarios = value;
-      },
-      error: (err) => {
-        console.error('Error al listar usuarios: ', err);
-        Swal.fire('Error', 'No se pudieron cargar los usuarios', 'error');
-      },
-      complete: () => console.log('Usuarios listados correctamente'),
-    });
+    this.refresh$.next();
   }
 
   protected deleteUsuario(username: string): void {
@@ -79,9 +82,7 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
       if (result.isConfirmed) {
         this.userService.deleteUsuario(username).subscribe({
           next: () => {
-            this.usuarios = this.usuarios.filter(
-              (user: UsuarioResponse): boolean => user.username !== username,
-            );
+            this.listarUsuarios();
             Swal.fire('Eliminado', 'Usuario eliminado correctamente', 'success');
           },
           error: (err) => {
@@ -102,12 +103,9 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
     if (this.esEditMode && this.selectedUsuario) {
       this.userService.putUsuario(usuarioData, usuarioData.username).subscribe({
         next: (newUser) => {
-          const index: number = this.usuarios.findIndex(
-            (usuario) => usuario.username === this.selectedUsuario?.username,
-          );
-          if (index !== 1) this.usuarios[index] = newUser;
-          Swal.fire('Registrado', 'Usuario registrado correctamente', 'success');
+          this.listarUsuarios();
           this.modalInstance.hide();
+          Swal.fire('Actualizado', 'Usuario actualizado correctamente', 'success');
         },
         error: (err) => {
           console.log('Error al registrar usuario: ', err);
@@ -123,7 +121,7 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
 
     this.userService.postUsuario(usuarioData).subscribe({
       next: (newUser) => {
-        this.usuarios.push(newUser);
+        this.listarUsuarios();
         Swal.fire('Registrado', 'Usuario registrado correctamente', 'success');
         this.modalInstance.hide();
       },
@@ -144,15 +142,28 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
 
   resetForm(): void {
     this.esEditMode = false;
-    this.usuarioForm.reset();
+    this.selectedUsuario = null;
+    this.textoModal = 'Registrar Usuario';
+    this.usuarioForm.reset({
+      username: '',
+      password: '',
+      roles: [],
+    });
+    this.usuarioForm.markAsPristine();
+    this.usuarioForm.markAsUntouched();
   }
 
   protected editarUsuario(usuario: UsuarioResponse): void {
     this.esEditMode = true;
-    this.selectedUsuario = usuario;
+    this.selectedUsuario = { ...usuario };
     this.textoModal = 'Editando Usuario: ' + usuario.username;
+    const rolesSeleccionados = usuario.roles.map((rol) => rol as string);
+    this.usuarioForm.patchValue({
+      username: usuario.username,
+      password: '',
+      roles: rolesSeleccionados,
+    });
 
-    this.usuarioForm.patchValue({ ...usuario });
     this.modalInstance.show();
   }
 }

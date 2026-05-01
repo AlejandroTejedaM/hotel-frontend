@@ -1,0 +1,153 @@
+<div class="container-fluid mt-4">
+  <h2>Habitaciones</h2>
+  <div class="d-flex justify-content-between mb-3">
+    <button *ngIf="isAdmin()" (click)="toggleForm()" class="btn btn-success">
+      <i class="fa-solid fa-plus"></i>
+      Registrar habitación
+    </button>
+  </div>
+
+  <table class="table table-striped table-bordered mt-3">
+    <thead class="table-dark">
+    <tr style="text-align: center;">
+      <th scope="col">#</th>
+      <th scope="col">Número</th>
+      <th scope="col">Tipo</th>
+      <th scope="col">Precio</th>
+      <th scope="col">Capacidad</th>
+      <th scope="col">Estado</th>
+      <th scope="col">Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let habitacion of habitaciones$ | async" style="text-align: center">
+      <th>{{ habitacion.id }}</th>
+      <td>{{ habitacion.numero }}</td>
+      <td>{{ habitacion.tipo }}</td>
+      <td>{{ habitacion.precio }}</td>
+      <td>{{ habitacion.capacidad }}</td>
+      <td>{{ habitacion.estado }}</td>
+      <td>
+        <button class="btn btn-primary btn-sm me-1 ms-1" (click)="editarHabitacion(habitacion)">
+          <i class="fa fa-edit"></i> Actualizar
+        </button>
+        <button *ngIf="isAdmin()" class="btn btn-secondary btn-sm me-1 ms-1" (click)="changeEstadoHabitacion(habitacion)">
+          <i class="fa fa-edit"></i> Cambiar Estado
+        </button>
+        <button *ngIf="isAdmin()" class="btn btn-danger btn-sm" (click)="deleteHabitacion(habitacion)">
+          <i class="fa fa-trash"></i> Eliminar
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div class="modal fade" #habitacionModalRef tabindex="-1" aria-labelledby="usuarioModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="usuarioModalLabel">{{ textoModal }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="habitacionForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label for="numero" class="form-label">Número de habitación</label>
+            <input id="numero" type="number" class="form-control" formControlName="numero"
+                   placeholder="Ej. 101" />
+            <div *ngIf="habitacionForm.get('numero')?.invalid && habitacionForm.get('numero')?.touched"
+                 class="text-danger small mt-1">
+              <span *ngIf="habitacionForm.get('numero')?.errors?.['required']">El número es requerido</span>
+              <span *ngIf="habitacionForm.get('numero')?.errors?.['min']">Debe ser positivo</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="tipo" class="form-label">Tipo</label>
+            <input id="tipo" class="form-control" formControlName="tipo"
+                   placeholder="Ej. Suite, Doble, Sencilla" />
+            <div *ngIf="habitacionForm.get('tipo')?.invalid && habitacionForm.get('tipo')?.touched"
+                 class="text-danger small mt-1">
+              <span *ngIf="habitacionForm.get('tipo')?.errors?.['required']">El tipo es requerido</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="precio" class="form-label">Precio</label>
+            <input id="precio" type="number" step="0.01" class="form-control" formControlName="precio"
+                   placeholder="Ej. 850.00" />
+
+            <div *ngIf="habitacionForm.get('precio')?.disabled && esEditMode" class="text-warning small mt-1">
+              <i class="fa fa-lock"></i> Sin permisos para modificar el precio
+            </div>
+
+            <div *ngIf="habitacionForm.get('precio')?.invalid && habitacionForm.get('precio')?.touched"
+                 class="text-danger small mt-1">
+              <span *ngIf="habitacionForm.get('precio')?.errors?.['required']">El precio es requerido</span>
+              <span *ngIf="habitacionForm.get('precio')?.errors?.['min']">Debe ser mayor a 0</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="capacidad" class="form-label">Capacidad</label>
+            <input id="capacidad" type="number" class="form-control" formControlName="capacidad"
+                   placeholder="Ej. 2" />
+            <div *ngIf="habitacionForm.get('capacidad')?.invalid && habitacionForm.get('capacidad')?.touched"
+                 class="text-danger small mt-1">
+              <span *ngIf="habitacionForm.get('capacidad')?.errors?.['required']">La capacidad es requerida</span>
+              <span *ngIf="habitacionForm.get('capacidad')?.errors?.['min']">Mínimo 1 persona</span>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button type="submit" class="btn btn-success px-4" [disabled]="habitacionForm.invalid">
+              <i class="fa fa-save"></i> Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" #habitacionChangeStatusModalRef tabindex="-1" aria-labelledby="habitacionChangeStatusModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="habitacionModalLabel">Cambiar Estado de la Habitación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="habitacionChangeStatusForm" (ngSubmit)="onSubmitChangeStatus()">
+          <div class="mb-3">
+            <label for="estados" class="form-label">Estado</label>
+            <select id="estados" class="form-select" formControlName="estado">
+              <option *ngFor="let estado of estadosHabitacion" [value]="estado">
+                {{ formatEstadoHabitacion(estado) }}
+              </option>
+            </select>
+            <div
+              *ngIf="habitacionChangeStatusForm.get('estado')?.invalid && habitacionChangeStatusForm.get('estado')?.touched"
+              class="text-danger small mt-1">
+                                <span *ngIf="habitacionChangeStatusForm.get('estado')?.errors?.['required']">
+                                    El estado es requerido
+                                </span>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button type="submit" class="btn btn-success px-4" [disabled]="habitacionChangeStatusForm.invalid">
+              <i class="fa fa-save"></i> Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
